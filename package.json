@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": " nodemon --exects-node src/index.ts",
+    "dev": " nodemon --exec ts-node src/index.ts",
     "build-stat": "npm run build && npm run start"
   },
   "author": "Ajitesh Singh Kahlon",

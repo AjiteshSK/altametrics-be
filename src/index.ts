@@ -3,9 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import Database from "./db";
 
-//Routes
-import userRouter from "../src/routes/user.routes";
-import reviewRouter from "../src/routes/reviews.routes";
+//Routes 
+import userRouter from "./routes/user.routes";
+import reviewRouter from "./routes/reviews.routes";
 
 dotenv.config();
 
