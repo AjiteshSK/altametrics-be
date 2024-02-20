@@ -28,12 +28,9 @@ export const authenticate = async (
     const token = authHeader.split(" ")[1];
     const decodedToken = jwt.decode(token, { json: true });
     const tokenSignature = decodedToken?.jti;
-    console.log("SIGNATURE", tokenSignature);
 
     const keys = await redisClient.keys("*");
-    console.log("ALL_KEYS", keys);
     const isBlacklisted = await redisClient.get(`blacklist:${tokenSignature}`);
-    console.log("ISBLAcK ", isBlacklisted);
     if (isBlacklisted) {
       return res.status(401).send("Token is blacklisted");
     }

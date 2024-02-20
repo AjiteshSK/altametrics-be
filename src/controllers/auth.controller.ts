@@ -77,7 +77,6 @@ export const SignOut = async (req: Request, res: Response) => {
     }
     const tokenSignature = decodedToken?.jti;
     const ttl = 86400;
-    console.log("TOKEN SIGN", tokenSignature);
     await redisClient.set(`blacklist:${tokenSignature}`, "true", "EX", ttl);
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
