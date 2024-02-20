@@ -4,13 +4,17 @@ import { Request, Response } from "express";
 export const addReview = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { isbn, rating, review } = req.body;
-
+    let { book, rating, review, status } = req.body;
+    if (status === "want to read") {
+      review = "";
+      rating = 0;
+    }
     const newReview = await Review.create({
       user: userId,
-      isbn,
+      book,
       rating,
       review,
+      status,
     });
     return res.status(200).json({ message: "Added review" });
   } catch (error) {
@@ -22,11 +26,11 @@ export const addReview = async (req: Request, res: Response) => {
 export const getReview = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { isbn } = req.body;
+    const { book } = req.params;
 
     const review = await Review.findOne({
       where: {
-        isbn,
+        book,
         user: userId,
       },
     });
@@ -45,16 +49,28 @@ export const getReview = async (req: Request, res: Response) => {
 export const updateReview = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { rating, review, isbn } = req.body;
-    const updatedReview = await Review.update(
-      { rating, review },
-      { where: { isbn, user: userId } }
-    );
+    let { rating, review, book, status } = req.body;
 
-    if (updatedReview[0] > 0) {
-      res.send("Review updated successfully");
+    if (status === "want to read") {
+      review = "";
+      rating = 0;
+    }
+
+    if (status === "none") {
+      return await deleteReview(req, res);
+    }
+    const [updatedReview, created] = await Review.upsert({
+      user: userId,
+      book,
+      rating,
+      review,
+      status,
+    });
+
+    if (created) {
+      res.send("Review created successfully");
     } else {
-      res.status(404).send("Review not found");
+      res.status(200).send("Review updated");
     }
   } catch (error) {
     console.error("UpdateReview Error:", error);
@@ -65,9 +81,9 @@ export const updateReview = async (req: Request, res: Response) => {
 export const deleteReview = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { isbn } = req.body;
+    const { book } = req.params;
     const deletedReview = await Review.destroy({
-      where: { isbn, user: userId },
+      where: { book, user: userId },
     });
 
     if (deletedReview) {

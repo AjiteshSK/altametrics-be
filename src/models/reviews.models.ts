@@ -19,7 +19,7 @@ import { Col } from "sequelize/types/utils";
   indexes: [
     {
       unique: true,
-      fields: ["user", "isbn"],
+      fields: ["user", "book"],
     },
   ],
 })
@@ -42,19 +42,26 @@ export default class Review extends Model {
   @Column({
     type: DataType.STRING,
   })
-  isbn!: string;
+  book!: string;
 
   @Column({
     type: DataType.INTEGER,
     validate: {
-      min: 1,
+      min: 0,
       max: 5,
     },
   })
   rating!: number;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
   })
   review!: string;
+
+  @Column({
+    type: DataType.ENUM,
+    values: ["read", "want to read"], // Defines the allowed values
+    allowNull: false,
+  })
+  status!: "read" | "want to read";
 }

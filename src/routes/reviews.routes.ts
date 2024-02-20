@@ -13,15 +13,13 @@ const router = express.Router();
 router.post("/add-review", authenticate, async (req, res) => {
   try {
     const addReviewSchema = z.object({
-      isbn: z.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\dXx-]+$/, {
-        message:
-          "ISBN must be either 10 or 13 digits long, with the 10th digit possibly being 'X'",
-      }),
+      book: z.string(),
       rating: z
         .number()
-        .min(1, { message: "Number must be at least 1" })
+        .min(0, { message: "Number must be at least 0" })
         .max(5, { message: "Number must be no more than 5" }),
       review: z.string(),
+      status: z.enum(["read", "want to read"]),
     });
 
     addReviewSchema.parse(req.body);
@@ -32,15 +30,13 @@ router.post("/add-review", authenticate, async (req, res) => {
   }
 });
 
-router.get("/get-review", authenticate, async (req, res) => {
+router.get("/get-review/:book", authenticate, async (req, res) => {
   try {
     const getReviewSchema = z.object({
-      isbn: z.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\dXx-]+$/, {
-        message:
-          "ISBN must be either 10 or 13 digits long, with the 10th digit possibly being 'X'",
-      }),
+      book: z.string(),
     });
-    getReviewSchema.parse(req.body);
+
+    getReviewSchema.parse({ book: req.params.book });
     return await getReview(req, res);
   } catch (error) {
     console.error("Validation error: /get-review", error);
@@ -51,37 +47,32 @@ router.get("/get-review", authenticate, async (req, res) => {
 router.put("/update-review", authenticate, async (req, res) => {
   try {
     const updateReviewSchema = z.object({
-      isbn: z.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\dXx-]+$/, {
-        message:
-          "ISBN must be either 10 or 13 digits long, with the 10th digit possibly being 'X'",
-      }),
+      book: z.string(),
       rating: z
         .number()
-        .min(1, { message: "Number must be at least 1" })
+        .min(0, { message: "Number must be at least 1" })
         .max(5, { message: "Number must be no more than 5" }),
       review: z.string(),
+      status: z.enum(["read", "want to read"]),
     });
 
     updateReviewSchema.parse(req.body);
     return await updateReview(req, res);
   } catch (error) {
-    console.error("Validation error: /get-review", error);
+    console.error("Validation error: /update-review", error);
     return res.status(400).json({ message: "Invalid request" });
   }
 });
 
-router.delete("/delete-review/", authenticate, async (req, res) => {
+router.delete("/delete-review/:book", authenticate, async (req, res) => {
   try {
     const deleteReviewSchema = z.object({
-      isbn: z.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\dXx-]+$/, {
-        message:
-          "ISBN must be either 10 or 13 digits long, with the 10th digit possibly being 'X'",
-      }),
+      book: z.string(),
     });
-    deleteReviewSchema.parse(req.body);
+    deleteReviewSchema.parse({ book: req.params.book });
     return await deleteReview(req, res);
   } catch (error) {
-    console.error("Validation error: /get-review", error);
+    console.error("Validation error: /delete-review", error);
     return res.status(400).json({ message: "Invalid request" });
   }
 });
